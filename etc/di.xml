@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright (c) 2026. Volodymyr Hryvinskyi. All rights reserved.
+ * Author: Volodymyr Hryvinskyi <volodymyr@hryvinskyi.com>
+ * GitHub: https://github.com/hryvinskyi
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Browser settings: the part that tells the page each event's channel and where to post events for the
+         server, present only while server-side delivery is on for the store's website -->
+    <type name="Hryvinskyi\DataLayerFrontendUi\Model\Browser\BrowserConfig">
+        <arguments>
+            <argument name="providers" xsi:type="array">
+                <item name="server" xsi:type="object">Hryvinskyi\DataLayerServerSideFrontendUi\Model\Browser\ServerConfigProvider</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Collector of the events a visitor's browser posts: its address and path, the plugin that answers it before
+         routing, and the request rules in the order they are checked (cheapest first) -->
+    <preference for="Hryvinskyi\DataLayerServerSideFrontendUi\Api\CollectUrlInterface"
+                type="Hryvinskyi\DataLayerServerSideFrontendUi\Model\CollectUrl"/>
+    <preference for="Hryvinskyi\DataLayerServerSideFrontendUi\Api\Collect\CollectPathInterface"
+                type="Hryvinskyi\DataLayerServerSideFrontendUi\Model\Collect\CollectPath"/>
+    <preference for="Hryvinskyi\DataLayerServerSideFrontendUi\Api\Collect\CollectRequestReaderInterface"
+                type="Hryvinskyi\DataLayerServerSideFrontendUi\Model\Collect\HttpCollectRequestReader"/>
+    <preference for="Hryvinskyi\DataLayerServerSideFrontendUi\Api\Collect\StorefrontAreaInterface"
+                type="Hryvinskyi\DataLayerServerSideFrontendUi\Model\Collect\StorefrontArea"/>
+    <!-- The collector is answered before routing. The area is not known yet when the application launches, so the
+         plugin is global; it is built for every request, so everything but the path check is built only when used -->
+    <type name="Magento\Framework\App\Http">
+        <plugin name="hryvinskyi_datalayer_server_collect"
+                type="Hryvinskyi\DataLayerServerSideFrontendUi\Plugin\AnswerCollectBeforeRouting"/>
+    </type>
+    <type name="Hryvinskyi\DataLayerServerSideFrontendUi\Plugin\AnswerCollectBeforeRouting">
+        <arguments>
+            <argument name="storefrontArea" xsi:type="object">Hryvinskyi\DataLayerServerSideFrontendUi\Api\Collect\StorefrontAreaInterface\Proxy</argument>
+            <argument name="requestReader" xsi:type="object">Hryvinskyi\DataLayerServerSideFrontendUi\Api\Collect\CollectRequestReaderInterface\Proxy</argument>
+            <argument name="collector" xsi:type="object">Hryvinskyi\DataLayerServerSide\Api\Collect\CollectServiceInterface\Proxy</argument>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface\Proxy</argument>
+        </arguments>
+    </type>
+    <type name="Hryvinskyi\DataLayerServerSide\Model\Collect\CollectService">
+        <arguments>
+            <argument name="rules" xsi:type="array">
+                <item name="enabled_website" xsi:type="object">Hryvinskyi\DataLayerServerSideFrontendUi\Model\Collect\Rule\EnabledWebsiteRule</item>
+                <item name="body_size" xsi:type="object">Hryvinskyi\DataLayerServerSideFrontendUi\Model\Collect\Rule\BodySizeRule</item>
+                <item name="json_content_type" xsi:type="object">Hryvinskyi\DataLayerServerSideFrontendUi\Model\Collect\Rule\JsonContentTypeRule</item>
+                <item name="same_origin" xsi:type="object">Hryvinskyi\DataLayerServerSideFrontendUi\Model\Collect\Rule\SameOriginRule</item>
+                <item name="ignored_user_agent" xsi:type="object">Hryvinskyi\DataLayerServerSideFrontendUi\Model\Collect\Rule\IgnoredUserAgentRule</item>
+            </argument>
+        </arguments>
+    </type>
+    <!-- User agent fragments of crawlers that run a page's scripts; their events never reach the outbox -->
+    <type name="Hryvinskyi\DataLayerServerSideFrontendUi\Model\Collect\Rule\IgnoredUserAgentRule">
+        <arguments>
+            <argument name="ignoredUserAgents" xsi:type="array">
+                <item name="googlebot" xsi:type="string">Googlebot</item>
+                <item name="google_ads_bot" xsi:type="string">AdsBot-Google</item>
+                <item name="google_media_partners" xsi:type="string">Mediapartners-Google</item>
+                <item name="google_inspection_tool" xsi:type="string">Google-InspectionTool</item>
+                <item name="google_store_bot" xsi:type="string">Storebot-Google</item>
+                <item name="google_read_aloud" xsi:type="string">Google-Read-Aloud</item>
+                <item name="bingbot" xsi:type="string">bingbot</item>
+                <item name="bing_preview" xsi:type="string">BingPreview</item>
+                <item name="bing_ads" xsi:type="string">adidxbot</item>
+                <item name="yandex" xsi:type="string">YandexBot</item>
+                <item name="yandex_renderer" xsi:type="string">YandexRenderResourcesBot</item>
+                <item name="baidu" xsi:type="string">Baiduspider</item>
+                <item name="duckduckgo" xsi:type="string">DuckDuckBot</item>
+                <item name="applebot" xsi:type="string">Applebot</item>
+                <item name="petalbot" xsi:type="string">PetalBot</item>
+                <item name="bytespider" xsi:type="string">Bytespider</item>
+                <item name="ahrefs" xsi:type="string">AhrefsBot</item>
+                <item name="semrush" xsi:type="string">SemrushBot</item>
+                <item name="facebook_preview" xsi:type="string">facebookexternalhit</item>
+                <item name="headless_chrome" xsi:type="string">HeadlessChrome</item>
+                <item name="lighthouse" xsi:type="string">Lighthouse</item>
+                <item name="webpagetest" xsi:type="string">PTST</item>
+                <item name="gtmetrix" xsi:type="string">GTmetrix</item>
+                <item name="pingdom" xsi:type="string">Pingdom</item>
+                <item name="screaming_frog" xsi:type="string">Screaming Frog</item>
+                <item name="prerender" xsi:type="string">Prerender</item>
+            </argument>
+        </arguments>
+    </type>
+</config>
