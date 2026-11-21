@@ -2,7 +2,7 @@
     "name": "hryvinskyi/magento2-data-layer-server-side-frontend-ui",
     "description": "Storefront surface of server-side GA4 events: the collector browsers post their events to, its request rules, and the part of the browser settings that names each event's channel and the collector address.",
     "type": "magento2-module",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "license": "MIT",
     "authors": [
         {
@@ -11,7 +11,7 @@
         }
     ],
     "require": {
-        "php": "~8.3.0||~8.4.0",
+        "php": "~8.3.0||~8.4.0||~8.5.0",
         "hryvinskyi/magento2-data-layer-api": "^1.0",
         "hryvinskyi/magento2-data-layer": "^1.0",
         "hryvinskyi/magento2-data-layer-frontend-ui": "^1.0",
